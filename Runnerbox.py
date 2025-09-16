@@ -172,3 +172,31 @@ def atualizar_inimigos():
         elif inimigo.estado == "correndo":
                 frame = int(inimigo.animacao_frame) % 2 + 1
                 inimigo.image = f'inimigo_correndo_{frame}'
+
+
+def verificar_colisoes():
+    global game_estado
+
+    # Verificar se o heroi colidiu com algum inimigo
+    for inimigo in inimigos:
+        if heroi.colidir(inimigo):
+            distancia = ((heroi.x - inimigo.x) ** 2 + (heroi.y - inimigo.y) ** 2) ** 0.5
+            if distancia < (heroi.x + inimigo.width / 2) * 0.9:
+                if heroi.velocidade_y > 0 and heroi.y < inimigo.y:
+                    # Herói pula sobre o inimigo
+                    heroi.velocidade_y = PULO * 0.7
+                    if SOM_LIGADO:
+                        try:
+                            sons.pulo.play()
+                        except:
+                            pass
+                    # Remover inimigo derrotado
+                    inimigos.remove(inimigo)
+                else:
+                    # Herói colidiu com o inimigo
+                    game_estado = GAME_OVER
+                    if SOM_LIGADO:
+                        try:
+                            sons.game_over.play()
+                        except:
+                            pass
