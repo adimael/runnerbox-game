@@ -200,3 +200,23 @@ def verificar_colisoes():
                             sons.game_over.play()
                         except:
                             pass
+
+def verificar_bandeira_coletada():
+    global game_estado, bandeiras_coletadas
+
+    # Verificar se o heroi coletou a bandeira
+    if not bandeira.coletada and heroi.colidir(bandeira):
+        distancia = ((heroi.x - bandeira.x) ** 2 + (heroi.y - bandeira.y) ** 2) ** 0.5
+        if distancia < (heroi.x + bandeira.width / 2) * 0.7:
+            bandeira.coletada = True
+            bandeira.image = 'bandeira_vermelha_a'
+            bandeiras_coletadas += 1
+
+            if SOM_LIGADO:
+                try:
+                    sons.bandeira.play()
+                except:
+                    pass
+
+            if bandeiras_coletadas >= 1:
+                game_estado = LEVEL_COMPLETO
