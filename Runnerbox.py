@@ -153,3 +153,22 @@ def atualizar_heroi():
     elif heroi.estado == 'pulando':
         heroi.image = 'heroi_pulando_1'
 
+def atualizar_inimigos():
+    global inimigos
+
+    for inimigo in inimigos:
+        # Comportamento de patrulha
+        inimigo.x += VELOCIDADE * 0.5 * inimigo.direcao
+
+        # Inverter direção nos limites da patrulha
+        if inimigo.x <= inimigo.patrulha_inicio or inimigo.x >= inimigo.patrulha_fim:
+            inimigo.direcao *= -1
+
+        # Atualizar animações do inimigo
+        inimigo.animacao_frame += inimigo.animacao_velocidade
+        if inimigo.estado == "parado":
+                frame = int(inimigo.animacao_frame) % 1 + 1
+                inimigo.image = f'inimigo_parado_{frame}'
+        elif inimigo.estado == "correndo":
+                frame = int(inimigo.animacao_frame) % 2 + 1
+                inimigo.image = f'inimigo_correndo_{frame}'
