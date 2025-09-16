@@ -9,6 +9,13 @@ WIDTH = 800
 HEIGHT = 600
 
 TITULO = "Runnerbox"
+NEW_GAME = "INICIAR JOGO"
+SOUND_ON = "SOM: LIGADO"
+SOUND_OFF = "SOM: DESLIGADO"
+EXIT = "SAIR"
+GAME_OVER_TEXT = "GAME OVER"
+LEVEL_COMPLETE_TEXT = "NÍVEL COMPLETO!"
+SCORE_TEXT = "Bandeiras Coletadas: {}"
 GRAVIDADE = 0.5
 PULO = -12
 VELOCIDADE = 5
@@ -220,3 +227,103 @@ def verificar_bandeira_coletada():
 
             if bandeiras_coletadas >= 1:
                 game_estado = LEVEL_COMPLETO
+
+def tecla_pressionada(tecla):
+    global heroi
+    
+    if game_estado == JOGANDO:
+        if tecla in (teclas.esquerda, teclas.direita):
+
+            heroi.estado = 'correndo'
+
+def tecla_solta(tecla):
+    global mouse
+    mouse = pos
+
+def mouse_movimento(pos):
+    global mouse
+    mouse = pos
+
+def mouse_clicado(pos):
+    global game_estado, som_ligado, heroi, inimigos, bandeiras_coletadas
+
+    if game_estado == MENU:
+        if iniciar_botao_rect.collidepoint(pos):
+            game_estado = JOGANDO
+            bandeiras_coletadas = 0
+            bandeira.coletada = False
+            bandeira.image = 'bandeira_off'
+            if som_ligado:
+                try:
+                    sons.iniciar.play()
+                except:
+                    pass
+        elif som_botao_rect.collidepoint(pos):
+            som_ligado = not som_ligado
+        elif sair_botao_rect.collidepoint(pos):
+            exit()
+    elif game_estado == GAME_OVER or game_estado == LEVEL_COMPLETO:
+        heroi.x = 100
+        heroi.y = 300
+        heroi.velocidade_y = 0
+        heroi.no_chao = False
+        heroi.direcao = 1
+        heroi.estado = 'parado'
+
+        inimigos.clear()
+        for i in range(4):
+            inimigo = Actor('inimigo_parado_1')
+            inimigo.x = 300 + i * 200
+
+            if i == 0:
+                inimigo.y = HEIGHT - 150 - inimigo.height / 2
+            elif i == 1:
+                inimigo.y = 350 - inimigo.height / 2
+            elif i == 2:
+                inimigo.y = 250 - inimigo.height / 2
+            elif i == 3:
+                inimigo.y = 150 - inimigo.height / 2
+                inimigo.x = 250  # Colocar o último inimigo perto da bandeira
+
+            inimigo.direcao = -1
+            inimigo.animacao_frame = 0
+            inimigo.animacao_velocidade = 0.1
+            inimigo.estado = 'parado'
+            inimigo.patrulha_inicio = inimigo.x - 50
+            inimigo.patrulha_fim = inimigo.x + 50
+            inimigos.append(inimigo)
+
+        # Reiniciar bandeira
+        bandeira.coletada = 0
+        bandeira.coletada = False
+        bandeira.image = 'bandeira_off'
+
+        # Retornar ao menu
+        game_estado = MENU
+
+def exibir_menu():
+    screen.clear()
+    screen.fill((50, 50, 100)) # Fundo azul
+
+    # Carregar título
+    screen.exibir_texto(TITULO, center=(WIDTH // 2, HEIGHT // 4), fontsize=64, color="white")
+
+    # Exibir botões
+    if iniciar_botao_rect.collidepoint(mouse):
+        screen.draw.filled_rect(iniciar_botao_rect, (100, 200, 100))
+    else:
+        screen.draw.filled_rect(iniciar_botao_rect, (0, 150, 0)) # verde escuro
+        screen.exibir_texto(NEW_GAME, center=iniciar_botao_rect.center, fontsize=36, color="white")
+
+    if som_botao_rect.collidepoint(mouse):
+        screen.draw.filled_rect(som_botao_rect, (100, 200, 100))
+    else:
+        screen.exibir_texto(som_botao_rect, (0, 0, 150)) # azul escuro
+        som_texto = SOUND_ON if som_ligado else SOUND_OFF
+        screen.exibir_texto(som_texto, center=som_botao_rect.center, fontsize=36, color="white")
+
+    if sair_botao_rect.collidepoint(mouse):
+        screen.draw.filled_rect(sair_botao_rect, (200, 100, 100))
+    else:
+        screen.draw.filled_rect(sair_botao_rect, (150, 0, 0)) # vermelho escuro
+        screen.exibir_texto(EXIT, center=sair_botao_rect.center, fontsize=36, color="white")
